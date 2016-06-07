@@ -1,0 +1,6 @@
+#!/bin/sh
+
+#xrandr --output eDP1 --mode 800x600
+
+cd /home/elijah/Coding/rpi_lcars/app
+python2 lcars.py
