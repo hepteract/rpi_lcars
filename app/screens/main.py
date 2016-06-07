@@ -2,6 +2,9 @@ from datetime import datetime
 import pygame
 from pygame.mixer import Sound
 
+import subprocess
+import socket
+
 from ui import colours
 from ui.widgets.background import LcarsBackgroundImage, LcarsImage
 from ui.widgets.gifimage import LcarsGifImage
@@ -17,7 +20,7 @@ class ScreenMain(LcarsScreen):
         # panel text
         all_sprites.add(LcarsText(colours.BLACK, (11, 52), "LCARS 105"),
                         layer=1)
-        all_sprites.add(LcarsText(colours.ORANGE, (0, 135), "HOME AUTOMATION", 2),
+        all_sprites.add(LcarsText(colours.ORANGE, (0, 135), "DATA INTERFACE", 2),
                         layer=1)
         all_sprites.add(LcarsText(colours.BLACK, (183, 74), "LIGHTS"),
                         layer=1)
@@ -25,17 +28,17 @@ class ScreenMain(LcarsScreen):
                         layer=1)
         all_sprites.add(LcarsText(colours.BLACK, (372, 70), "ENERGY"),
                         layer=1)
-        all_sprites.add(LcarsText(colours.BLACK, (444, 612), "192 168 0 3"),
+        all_sprites.add(LcarsText(colours.BLACK, (444, 612), socket.gethostbyname(socket.gethostname()).replace(".", " ") ),
                         layer=1)
 
         # info text
-        all_sprites.add(LcarsText(colours.WHITE, (192, 174), "EVENT LOG:", 1.5),
+        all_sprites.add(LcarsText(colours.WHITE, (192, 130), "EVENT LOG:", 1.5),
                         layer=3)
-        all_sprites.add(LcarsText(colours.BLUE, (244, 174), "2 ALARM ZONES TRIGGERED", 1.5),
+        all_sprites.add(LcarsText(colours.BLUE, (244, 130), "acpi", 1),
                         layer=3)
-        all_sprites.add(LcarsText(colours.BLUE, (286, 174), "14.3 kWh USED YESTERDAY", 1.5),
+        all_sprites.add(LcarsText(colours.BLUE, (286, 130), "uptime", 1),
                         layer=3)
-        all_sprites.add(LcarsText(colours.BLUE, (330, 174), "1.3 Tb DATA USED THIS MONTH", 1.5),
+        all_sprites.add(LcarsText(colours.BLUE, (330, 130), "fqdn", 1),
                         layer=3)
         self.info_text = all_sprites.get_sprites_from_layer(3)
 
@@ -77,6 +80,10 @@ class ScreenMain(LcarsScreen):
         if pygame.time.get_ticks() - self.lastClockUpdate > 1000:
             self.stardate.setText("STAR DATE {}".format(datetime.now().strftime("%d%m.%y %H:%M:%S")))
             self.lastClockUpdate = pygame.time.get_ticks()
+
+            self.info_text[1].setText( subprocess.check_output("acpi").upper()[:-1] ) 
+            self.info_text[2].setText( subprocess.check_output("uptime").upper()[1:-1] )
+            self.info_text[3].setText( subprocess.check_output("fqdn").upper()[:-1] )
         LcarsScreen.update(self, screenSurface, fpsClock)
         
     def handleEvents(self, event, fpsClock):
@@ -93,19 +100,36 @@ class ScreenMain(LcarsScreen):
             for sprite in self.info_text:
                 sprite.visible = False
 
+    def showInfoText(self):
+        self.sensor_gadget.visible = False
+        self.dashboard.visible = False
+        self.weather.visible = False
+
+        for sprite in self.info_text:
+            sprite.visible = True
+
     def gaugesHandler(self, item, event, clock):
+        if self.dashboard.visible:
+            self.showInfoText()
+            return
         self.hideInfoText()
         self.sensor_gadget.visible = False
         self.dashboard.visible = True
         self.weather.visible = False
 
     def sensorsHandler(self, item, event, clock):
+        if self.sensor_gadget.visible:
+            self.showInfoText()
+            return
         self.hideInfoText()
         self.sensor_gadget.visible = True
         self.dashboard.visible = False
         self.weather.visible = False
     
     def weatherHandler(self, item, event, clock):
+        if self.weather.visible:
+            self.showInfoText()
+            return
         self.hideInfoText()
         self.sensor_gadget.visible = False
         self.dashboard.visible = False

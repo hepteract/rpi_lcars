@@ -59,7 +59,7 @@ class ScreenAuthorize(LcarsScreen):
                 from screens.main import ScreenMain
                 self.loadScreen(ScreenMain())
             else:
-                self.sound_denied.play()
-        
+                #self.sound_denied.play()
+                pass
 
         return False
