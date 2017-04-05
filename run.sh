@@ -1,3 +1,3 @@
 #!/bin/sh
 
-xinit ./lcars
+xinit ./lcars -nocursor

@@ -5,7 +5,7 @@ from ui.ui import UserInterface
 UI_PLACEMENT_MODE = True
 RESOLUTION = (800, 480)
 FPS = 60
-DEV_MODE = True
+DEV_MODE = False
 
 if __name__ == "__main__":
     firstScreen = ScreenAuthorize()
